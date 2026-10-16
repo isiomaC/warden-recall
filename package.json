@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",
+    "@memstack/core": "^0.8.5",
+    "@stlw/warden": "^0.2.8",
     "falkordb": "^6.8.0",
     "hono": "^4.13.13",
     "yaml": "^2.9.1",
