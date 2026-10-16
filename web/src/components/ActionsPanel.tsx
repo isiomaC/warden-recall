@@ -146,7 +146,7 @@ export function ActionsPanel(p: Props) {
         {mem.error && <p className="hint" role="alert" style={{ color: "var(--deny)" }}>{mem.error}</p>}
         {p.memoryError && <p className="hint" role="alert" style={{ color: "var(--warn)" }}>{p.memoryError}</p>}
         {p.memories.length === 0 && !p.memoryError && <p className="hint">Nothing remembered for INC-102 yet. Saved investigations appear here in later sessions, labelled as memory and checked against the graph.</p>}
-        {p.memories.map((m) => (
+        {p.memories.slice(0, 2).map((m) => (
           <div key={m.id} className={`mem ${m.stale ? "stale" : ""}`}>
             <div className="row">
               <span className="badge plain">Remembered</span>
@@ -158,6 +158,7 @@ export function ActionsPanel(p: Props) {
             <span className="hint mono">session {m.sessionId ?? "unknown"}</span>
           </div>
         ))}
+        {p.memories.length > 2 && <p className="hint">{p.memories.length - 2} older remembered investigation{p.memories.length - 2 === 1 ? "" : "s" } not shown.</p>}
       </section>
     </>
   );

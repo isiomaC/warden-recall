@@ -6,7 +6,7 @@ import type { Evidence, GraphData } from "../api";
 import { edgeKey, TYPES } from "../format";
 
 type NodeData = { type: string; label: string; id: string; state: "plain" | "hit" | "dim" | "focus"; fresh: boolean };
-const W = 150;
+const W = 130;
 const H = 44;
 
 function EntityNode({ data }: NodeProps<Node<NodeData>>) {
@@ -29,7 +29,7 @@ function computeLayout(graph: GraphData, cache: Map<string, { x: number; y: numb
   const needsFull = graph.nodes.some((n) => !cache.has(n.id) && n.type !== "Ticket");
   if (needsFull) {
     const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: "TB", nodesep: 16, ranksep: 26, marginx: 16, marginy: 16 });
+    g.setGraph({ rankdir: "TB", nodesep: 12, ranksep: 26, marginx: 16, marginy: 16 });
     g.setDefaultEdgeLabel(() => ({}));
     const core = graph.nodes.filter((n) => n.type !== "Team" && n.type !== "Ticket");
     core.forEach((n) => g.setNode(n.id, { width: W, height: H + 16 }));
@@ -58,7 +58,7 @@ function FitOnResize({ host }: { host: React.RefObject<HTMLDivElement | null> })
   useEffect(() => {
     if (!host.current) return;
     let t: number | undefined;
-    const ro = new ResizeObserver(() => { window.clearTimeout(t); t = window.setTimeout(() => fitView({ duration: 0, padding: 0.12 }), 120); });
+    const ro = new ResizeObserver(() => { window.clearTimeout(t); t = window.setTimeout(() => fitView({ duration: 0, padding: 0.04 }), 120); });
     ro.observe(host.current);
     return () => { ro.disconnect(); window.clearTimeout(t); };
   }, [fitView, host]);
@@ -100,7 +100,6 @@ export function GraphPanel({ graph, evidence, focusIds, freshEdges, onOpenSource
         className: `${hit ? "hit" : hasEv ? "dim" : ""} ${fresh ? "fresh" : ""}`.trim(),
         label: fresh ? e.type : undefined,
         markerEnd: { type: MarkerType.ArrowClosed, color, width: 14, height: 14 },
-        zIndex: hit || fresh ? 2 : 0,
       };
     });
     return { nodes, edges };
@@ -113,7 +112,10 @@ export function GraphPanel({ graph, evidence, focusIds, freshEdges, onOpenSource
     <section className="pane" aria-label="Company graph">
       <div className="pane-head">
         <h2>Company graph</h2>
-        <span className="hint">{graph ? `${graph.nodes.length} entities, ${graph.edges.length} relationships as of ${graph.asOf.slice(0, 16).replace("T", " ")} UTC` : "Loading"}</span>
+        <span className="hint">{graph ? `${graph.nodes.length} entities, ${graph.edges.length} relationships` : "Loading"}</span>
+        <div className="legend" aria-hidden="true">
+          {TYPES.map((t) => <span key={t} className="tab" data-type={t}>{t}</span>)}
+        </div>
       </div>
       <div className="graph-wrap" ref={host}>
         {!graph ? (
@@ -121,20 +123,17 @@ export function GraphPanel({ graph, evidence, focusIds, freshEdges, onOpenSource
         ) : (
           <ReactFlowProvider>
             <ReactFlow
-              nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.12 }}
-              nodesDraggable={false} nodesConnectable={false} minZoom={0.3} maxZoom={1.6}
+              nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView fitViewOptions={{ padding: 0.04 }}
+              nodesDraggable={false} nodesConnectable={false} minZoom={0.3} maxZoom={1.8}
               onNodeClick={(_, n) => setSelected((cur) => (cur === n.id ? null : n.id))} onPaneClick={() => setSelected(null)}
               proOptions={{ hideAttribution: true }}
             >
               <Background gap={24} size={1} color="var(--seam)" />
-              <Controls showInteractive={false} position="bottom-right" />
+              <Controls showInteractive={false} position="top-right" />
               <FitOnResize host={host} />
             </ReactFlow>
           </ReactFlowProvider>
         )}
-        <div className="legend" aria-hidden="true">
-          {TYPES.map((t) => <span key={t} className="tab" data-type={t}>{t}</span>)}
-        </div>
         {sel && (
           <div className="node-detail" role="region" aria-label={`${sel.label} details`}>
             <div className="row"><span className="tab" data-type={sel.type}>{sel.type}</span><strong>{sel.label}</strong></div>
