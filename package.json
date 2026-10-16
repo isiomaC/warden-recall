@@ -7,22 +7,37 @@
     "test": "vitest run",
     "test:graph-smoke": "vitest run tests/graph-smoke.test.ts",
     "demo:seed": "node src/seed.ts",
-    "typecheck": "tsc",
-    "api": "node src/api/main.ts"
+    "typecheck": "tsc && tsc -p web",
+    "api": "node src/api/main.ts",
+    "dev": "concurrently -k -n api,web -c blue,green \"node --watch src/api/main.ts\" \"vite --config web/vite.config.ts\"",
+    "build:web": "vite build --config web/vite.config.ts",
+    "start": "pnpm build:web && node src/api/main.ts"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^3.1.1",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "@hono/node-server": "^2.1.5",
     "@memstack/core": "^0.8.5",
+    "@phosphor-icons/react": "^2.1.10",
     "@stlw/warden": "^0.2.8",
+    "@xyflow/react": "^12.12.0",
     "falkordb": "^6.8.0",
     "hono": "^4.13.13",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "yaml": "^2.9.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.6",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
+    "vite": "^8.3.4",
     "vitest": "^5.0.5"
   }
 }
