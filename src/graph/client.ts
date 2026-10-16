@@ -11,9 +11,13 @@ export class GraphUnavailableError extends Error {
   }
 }
 
-export async function connect(): Promise<Db> {
+/**
+ * `onLost` runs when the connection drops. The client is an EventEmitter that emits "error" on a socket
+ * failure, and an unhandled "error" event kills the process, so a listener is always attached.
+ */
+export async function connect(onLost?: (e: Error) => void): Promise<Db> {
   try {
-    return await FalkorDB.connect({
+    const db = await FalkorDB.connect({
       socket: {
         host: process.env.FALKORDB_HOST ?? "localhost",
         port: Number(process.env.FALKORDB_PORT ?? 6379),
@@ -22,6 +26,8 @@ export async function connect(): Promise<Db> {
         connectTimeout: 3000,
       } as any,
     });
+    db.on("error", (e: Error) => onLost?.(e));
+    return db;
   } catch (e) {
     throw new GraphUnavailableError(e);
   }

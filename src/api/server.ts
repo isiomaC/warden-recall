@@ -30,14 +30,16 @@ const AskBody = z.strictObject({
 /** Lazily (re)connects, so the API recovers when FalkorDB comes back after an outage. */
 export function graphProvider(name = GRAPH_NAME) {
   let db: Db | null = null;
+  // a dropped connection is discarded so the next request reconnects instead of using a dead client
+  const lost = () => { const d = db; db = null; void d?.close().catch(() => {}); };
   return {
     name,
     async graph(): Promise<Graph> {
-      if (!db) db = await connect();
+      if (!db) db = await connect(lost);
       return db.selectGraph(name);
     },
     async reset(): Promise<Graph> {
-      if (!db) db = await connect();
+      if (!db) db = await connect(lost);
       return resetGraph(db, name);
     },
     drop() { const d = db; db = null; void d?.close().catch(() => {}); },

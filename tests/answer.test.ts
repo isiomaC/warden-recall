@@ -153,6 +153,13 @@ describe("after the ownership update", () => {
 });
 
 describe("FalkorDB offline", () => {
+  it("a dropped connection never crashes the process (the client emits 'error', which must have a listener)", async () => {
+    let lost: Error | null = null;
+    const tmp = await connect((e) => { lost = e; });
+    expect(() => tmp.emit("error", new Error("socket closed unexpectedly"))).not.toThrow();
+    expect((lost as Error | null)?.message).toBe("socket closed unexpectedly");
+    await tmp.close();
+  });
   it("fails closed: connecting to a dead port raises graph_unavailable", async () => {
     const prev = process.env.FALKORDB_PORT;
     process.env.FALKORDB_PORT = "1";
