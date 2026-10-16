@@ -77,23 +77,23 @@ export function ActionsPanel(p: Props) {
         <CustodyStrip serviceId={CUSTODY_SERVICE} history={p.custody} asOf={p.asOf} />
         {p.preview && (
           <>
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-              <button className="chip" onClick={() => p.onOpenSource(p.preview!.id)} disabled={!p.preview.applied} title={p.preview.applied ? "Open the ingested document" : "Not ingested yet"}>{p.preview.id}</button>
-              <span className="hint mono" style={{ overflowWrap: "anywhere" }}>{p.preview.path}</span>
+            <div className="row">
+              <button className="chip" onClick={() => p.onOpenSource(p.preview!.id)} disabled={!p.preview.applied} title={p.preview.applied ? "Open the ingested document" : p.preview.path}>{p.preview.id}</button>
+              {p.preview.applied && <span className="hint">ingested</span>}
             </div>
-            <pre className="docprev">{p.preview.content.replace(/^---\n[\s\S]*?\n---\n/, "").trim()}</pre>
-            <button className="btn primary" disabled={ingest.busy || p.preview.applied} aria-busy={ingest.busy}
-              onClick={() => ingest.run(p.onIngest)}>{p.preview.applied ? "Document already ingested" : ingest.busy ? "Ingesting" : "Ingest this document"}</button>
+            {!p.preview.applied && (
+              <>
+                <pre className="docprev">{p.preview.content.replace(/^---\n[\s\S]*?\n---\n/, "").trim()}</pre>
+                <button className="btn primary" disabled={ingest.busy} aria-busy={ingest.busy} onClick={() => ingest.run(p.onIngest)}>{ingest.busy ? "Ingesting" : "Ingest this document"}</button>
+              </>
+            )}
           </>
         )}
         {ingest.error && <p className="hint" role="alert" style={{ color: "var(--deny)" }}>{ingest.error}</p>}
         {p.receipt && (
-          <div className="receipt reveal" role="status">
-            <span>Documents ingested</span><b>{p.receipt.result.documentsIngested}</b>
-            <span>Skipped (unchanged)</span><b>{p.receipt.result.documentsSkipped}</b>
-            <span>Ownership closed</span><b>{p.receipt.result.ownershipClosed}</b>
-            <span>Relationships created</span><b>{p.receipt.result.relationshipsCreated}</b>
-          </div>
+          <p className="receipt reveal" role="status">
+            Ingested {p.receipt.result.documentsIngested} document, closed {p.receipt.result.ownershipClosed} ownership interval, created {p.receipt.result.relationshipsCreated} relationship.
+          </p>
         )}
       </section>
 

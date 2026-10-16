@@ -29,7 +29,7 @@ function computeLayout(graph: GraphData, cache: Map<string, { x: number; y: numb
   const needsFull = graph.nodes.some((n) => !cache.has(n.id) && n.type !== "Ticket");
   if (needsFull) {
     const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: "TB", nodesep: 18, ranksep: 34, marginx: 16, marginy: 16 });
+    g.setGraph({ rankdir: "TB", nodesep: 16, ranksep: 26, marginx: 16, marginy: 16 });
     g.setDefaultEdgeLabel(() => ({}));
     const core = graph.nodes.filter((n) => n.type !== "Team" && n.type !== "Ticket");
     core.forEach((n) => g.setNode(n.id, { width: W, height: H + 16 }));
@@ -43,7 +43,7 @@ function computeLayout(graph: GraphData, cache: Map<string, { x: number; y: numb
       minX = Math.min(minX, pos.x); maxX = Math.max(maxX, pos.x); minY = Math.min(minY, pos.y);
     });
     const teams = graph.nodes.filter((n) => n.type === "Team");
-    teams.forEach((t, i) => cache.set(t.id, { x: minX + ((maxX - minX) * (i + 0.5)) / teams.length - W / 2 + W / 2, y: minY - 110 }));
+    teams.forEach((t, i) => cache.set(t.id, { x: minX + ((maxX - minX) * (i + 0.5)) / teams.length - W / 2 + W / 2, y: minY - 96 }));
   }
   // tickets hang below the incident they escalate
   graph.nodes.filter((n) => n.type === "Ticket" && !cache.has(n.id)).forEach((t, i) => {
@@ -94,7 +94,7 @@ export function GraphPanel({ graph, evidence, focusIds, freshEdges, onOpenSource
       const k = edgeKey(e);
       const hit = hasEv && hitE.has(k);
       const fresh = freshEdges.has(k);
-      const color = fresh ? "var(--accent)" : hit ? "var(--ink)" : "var(--ink-3)";
+      const color = hit || fresh ? "var(--accent)" : "var(--ink-3)";
       return {
         id: k, source: e.from, target: e.to, type: "smoothstep", pathOptions: { borderRadius: 8 },
         className: `${hit ? "hit" : hasEv ? "dim" : ""} ${fresh ? "fresh" : ""}`.trim(),

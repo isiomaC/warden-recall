@@ -127,7 +127,7 @@ export default function App() {
 
       <main className="main">
         <div className="mobile-tabs" role="tablist" aria-label="Panels">
-          {([["answer", "Answer"], ["graph", "Graph and evidence"], ["actions", "Actions"]] as const).map(([id, label]) => (
+          {([["answer", "Answer"], ["graph", "Graph"], ["actions", "Actions"]] as const).map(([id, label]) => (
             <button key={id} role="tab" className="tabbtn" aria-selected={panel === id} onClick={() => setPanel(id)}>{label}</button>
           ))}
         </div>

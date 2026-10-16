@@ -70,6 +70,7 @@ export function AskPanel({ answer, loading, changeNote, onAsk, onFocus, onOpenSo
               <span>{changeNote.detail}</span>
             </div>
           )}
+          {answer.question && <p className="asked">Asked: <q>{answer.question}</q></p>}
           <p className="headline">{answer.headline}</p>
 
           {answer.status === "disambiguation" && answer.candidates && (
