@@ -7,10 +7,13 @@
     "test": "vitest run",
     "test:graph-smoke": "vitest run tests/graph-smoke.test.ts",
     "demo:seed": "node src/seed.ts",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "api": "node src/api/main.ts"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.5",
     "falkordb": "^6.8.0",
+    "hono": "^4.13.13",
     "yaml": "^2.9.1",
     "zod": "^4.6.7"
   },
