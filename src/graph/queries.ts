@@ -123,3 +123,27 @@ export async function getIncident(g: Graph, incidentId: string) {
   const { id, title, severity, status, openedAt } = r.rows[0];
   return { query: r.query, incident: { id, title, severity, status, openedAt, services: r.rows.map((x) => ({ id: x.sid, name: x.sname, tier: x.tier })) } };
 }
+
+// Q2h: full ownership timeline for a service (the same OWNS edges, all intervals).
+export type OwnershipInterval = { teamId: string; teamName: string; validFrom: number; validTo: number | null; sourceId: string; sourcePath: string };
+export async function getOwnershipHistory(g: Graph, serviceId: string) {
+  const r = await q<OwnershipInterval>(g, "Q2h ownership history",
+    `MATCH (t:Team)-[o:OWNS]->(s:Service {id:$serviceId})
+     MATCH (d:Document) WHERE d.id = o.sourceId
+     RETURN t.id AS teamId, t.name AS teamName, o.validFrom AS validFrom, o.validTo AS validTo, d.id AS sourceId, d.path AS sourcePath
+     ORDER BY validFrom`, { serviceId });
+  return { query: r.query, history: r.rows };
+}
+
+export type SourceDoc = { id: string; title: string; path: string };
+export async function getSources(g: Graph, ids: string[]) {
+  const r = await q<SourceDoc>(g, "Source documents",
+    `MATCH (d:Document) WHERE d.id IN $ids RETURN d.id AS id, d.title AS title, d.path AS path ORDER BY id`, { ids });
+  return { query: r.query, sources: r.rows };
+}
+
+export async function getService(g: Graph, serviceId: string) {
+  const r = await q<{ id: string; name: string; tier: number }>(g, "Service lookup",
+    `MATCH (s:Service {id:$serviceId}) RETURN s.id AS id, s.name AS name, s.tier AS tier`, { serviceId });
+  return { query: r.query, service: r.rows[0] ?? null };
+}
