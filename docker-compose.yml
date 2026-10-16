@@ -1,0 +1,15 @@
+services:
+  falkordb:
+    # FalkorDB v4.22.1, pinned by digest
+    image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a
+    ports:
+      - "6379:6379"
+    volumes:
+      - falkordb-data:/var/lib/falkordb/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  falkordb-data:
