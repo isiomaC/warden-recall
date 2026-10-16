@@ -44,11 +44,12 @@ Set `DEMO_AS_OF=2026-10-18T10:00:00Z` for a deterministic clock.
 ## Tests
 
 ```sh
-pnpm test                     # needs the FalkorDB container running
+pnpm test                     # unit and integration tests; needs the FalkorDB container running
+pnpm test:e2e                 # drives the real UI in Chrome against the real API (stops and restarts FalkorDB once)
 pnpm typecheck
 ```
 
-The tests run against a real FalkorDB: graph features, ingestion rules, answer assembly, the HTTP API, Warden policy decisions and the audit chain, MemStack recall and staleness, demo reset, and the fail-closed behavior when FalkorDB or the policy engine is unavailable.
+The integration tests run against a real FalkorDB: graph features, ingestion rules, answer assembly, the HTTP API, Warden policy decisions and the audit chain, MemStack recall and staleness, demo reset, and the fail-closed behavior when FalkorDB or the policy engine is unavailable. The end-to-end tests cover the user-visible flows: asking and the evidence behind answers, the live ownership update, escalation allow and deny, memory and stale detection, narrow screens, dark mode, and a FalkorDB outage with recovery.
 
 ## Documentation
 

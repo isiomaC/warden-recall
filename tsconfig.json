@@ -16,6 +16,11 @@
   },
   "include": [
     "src",
-    "tests"
+    "tests",
+    "vitest.config.ts"
+  ],
+  "exclude": [
+    "tests/e2e",
+    "node_modules"
   ]
 }

@@ -7,11 +7,12 @@
     "test": "vitest run",
     "test:graph-smoke": "vitest run tests/graph-smoke.test.ts",
     "demo:seed": "node src/seed.ts",
-    "typecheck": "tsc && tsc -p web",
+    "typecheck": "tsc && tsc -p web && tsc -p tests/e2e",
     "api": "node src/api/main.ts",
     "dev": "concurrently -k -n api,web -c blue,green \"node --watch src/api/main.ts\" \"vite --config web/vite.config.ts\"",
     "build:web": "vite build --config web/vite.config.ts",
-    "start": "pnpm build:web && node src/api/main.ts"
+    "start": "pnpm build:web && node src/api/main.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@dagrejs/dagre": "^3.1.1",
@@ -30,6 +31,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
