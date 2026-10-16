@@ -24,6 +24,8 @@ export type RecalledInvestigation = { id: string; savedAt: string; sessionId: st
 export interface InvestigationMemory {
   save(input: { sessionId: string; summary: string; refs: InvestigationRefs }): Promise<{ id: string }>;
   recall(incidentId: string): Promise<RecalledInvestigation[]>;
+  /** Forget everything this app remembered (used by the demo reset). */
+  clear(): Promise<void>;
 }
 
 export function createMemStackMemory(storageDir = process.env.MEMSTACK_DIR ?? ".data/memstack"): InvestigationMemory {
@@ -55,6 +57,10 @@ export function createMemStackMemory(storageDir = process.env.MEMSTACK_DIR ?? ".
         } catch { /* skip malformed memory */ }
       }
       return out.sort((a, b) => b.savedAt.localeCompare(a.savedAt));
+    },
+    async clear() {
+      const { hits } = await memory.recall({ namespaces: [NAMESPACE], limit: 1000, maxChars: 100_000_000 });
+      for (const { memory: m } of hits) await memory.forget(m.id, [NAMESPACE]);
     },
   };
 }

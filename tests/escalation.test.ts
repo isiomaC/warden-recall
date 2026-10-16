@@ -183,9 +183,19 @@ describe("after the ownership update", () => {
   });
 });
 
+describe("demo reset", () => {
+  it("wipes the graph and the remembered investigations, so a recording starts clean", async () => {
+    expect((await call("/api/memory?incidentId=inc-102")).body.memories.length).toBeGreaterThan(0);
+    expect((await post("/api/reset")).status).toBe(200);
+    expect((await call("/api/memory?incidentId=inc-102")).body.memories).toEqual([]);
+    expect((await call("/api/tickets?incidentId=inc-102")).body.tickets).toEqual([]);
+    expect((await call("/api/custody/payment-queue")).body.history).toHaveLength(1);
+  });
+});
+
 describe("degraded dependencies", () => {
   it("a MemStack failure degrades memory only; graph answers still work", async () => {
-    const boom = createApp(provider, { ...services, memory: { save: async () => { throw new Error("disk full"); }, recall: async () => { throw new Error("disk gone"); } } });
+    const boom = createApp(provider, { ...services, memory: { save: async () => { throw new Error("disk full"); }, recall: async () => { throw new Error("disk gone"); }, clear: async () => {} } });
     const save = await boom.request("/api/memory/save", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ incidentId: "inc-102", sessionId: "s9" }) });
     expect(save.status).toBe(503);
     expect(((await save.json()) as any).error).toBe("memory_unavailable");

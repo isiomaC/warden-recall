@@ -3,8 +3,10 @@ import type { Graph } from "../graph/client.ts";
 import { getIncident, getOwners } from "../graph/queries.ts";
 import type { PolicyAuthority, PolicyDecision } from "../integrations/warden.ts";
 
+export type EscalationErrorCode = "incident_not_found" | "no_owner" | "stale_draft" | "confirmation_required";
 export class EscalationError extends Error {
-  constructor(readonly code: "incident_not_found" | "no_owner" | "stale_draft" | "confirmation_required", message: string) { super(message); }
+  readonly code: EscalationErrorCode;
+  constructor(code: EscalationErrorCode, message: string) { super(message); this.code = code; }
 }
 
 export type EscalationDraft = {

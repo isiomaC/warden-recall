@@ -7,6 +7,7 @@ import { effectiveAsOf, InvalidAsOfError } from "../clock.ts";
 import { connect, ensureIndexes, GraphUnavailableError, GRAPH_NAME, resetGraph, type Db, type Graph } from "../graph/client.ts";
 import type { EvidenceEdge, EvidenceNode, RawEdge, RawNode } from "../graph/paths.ts";
 import { evidenceNode } from "../graph/paths.ts";
+import { getOwnershipHistory } from "../graph/queries.ts";
 import { IngestError, ingestDocuments, loadDocuments } from "../ingestion/ingest.ts";
 import { buildDraft, EscalationError, listTickets, submitEscalation } from "../actions/escalation.ts";
 import { recallInvestigations, saveInvestigation } from "../actions/memory.ts";
@@ -152,6 +153,12 @@ export function createApp(provider: GraphProvider, services: Services = defaultS
     return c.json({ asOf: new Date(asOf).toISOString(), nodes, edges });
   });
 
+  // Custody chain: every ownership interval for a service with its source document.
+  app.get("/api/custody/:serviceId", async (c) => {
+    const { query, history } = await getOwnershipHistory(await provider.graph(), c.req.param("serviceId"));
+    return c.json({ serviceId: c.req.param("serviceId"), query, history });
+  });
+
   app.get("/api/source/:id", async (c) => {
     const g = await provider.graph();
     const r = await g.query<{ id: string; title: string; path: string }>(
@@ -183,6 +190,7 @@ export function createApp(provider: GraphProvider, services: Services = defaultS
   // Demo reset: wipe the graph and re-seed from the Markdown fixtures.
   app.post("/api/reset", async (c) => {
     const g = await provider.reset();
+    await services.memory.clear().catch((e) => console.error("memory clear failed", e));
     await ensureIndexes(g);
     const result = await ingestDocuments(g, await loadDocuments(SEED_DIR));
     return c.json({ result });

@@ -40,6 +40,15 @@ describe("API: live freshness flow", () => {
     expect(g.nodes.some((n: any) => n.type === "Document")).toBe(false);
   });
 
+  it("custody chain lists the single open interval before the update", async () => {
+    const c = (await json("/api/custody/payment-queue")).body;
+    expect(c.history).toHaveLength(1);
+    expect(c.history[0]).toMatchObject({ teamId: "payments", sourceId: "ownership-payment-queue-20261015" });
+    expect(c.history[0].validTo ?? null).toBeNull();
+    expect(c.query.cypher).toContain("OWNS");
+    expect((await json("/api/custody/no-such-service")).body.history).toEqual([]);
+  });
+
   it("previews the pending update before it is applied", async () => {
     const p = (await json("/api/update-preview")).body.updates;
     expect(p).toHaveLength(1);
@@ -62,6 +71,9 @@ describe("API: live freshness flow", () => {
     expect(ownersOf(old, "payment-queue")).toEqual(["payments"]);
 
     expect((await json("/api/update-preview")).body.updates[0].applied).toBe(true);
+    const custody = (await json("/api/custody/payment-queue")).body.history;
+    expect(custody.map((h: any) => h.teamId)).toEqual(["payments", "commerce-reliability"]);
+    expect(custody[0].validTo).toBe(custody[1].validFrom);
   });
 
   it("re-applying the update is a no-op", async () => {

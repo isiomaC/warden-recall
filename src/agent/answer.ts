@@ -40,6 +40,8 @@ export type PresetId = keyof typeof PRESETS;
 
 const iso = (ms: number | null) => (ms == null ? null : new Date(ms).toISOString());
 const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+/** Readable UTC timestamp for answer text: 2026-10-16 12:00 UTC */
+const stamp = (ms: number) => `${new Date(ms).toISOString().slice(0, 16).replace("T", " ")} UTC`;
 
 type Collector = { queries: QueryRecord[]; evidence: Evidence[]; sourceIds: Set<string> };
 const collector = (): Collector => ({ queries: [], evidence: [], sourceIds: new Set() });
@@ -67,11 +69,11 @@ async function ownershipSections(g: Graph, c: Collector, failedId: string, servi
       c.sourceIds.add(o.sourceId);
       c.evidence.push(own(o.serviceId, o.teamId));
       claims.push({ claim: `${o.teamName} owns ${o.serviceId} (since ${day(o.validFrom!)})`, entityIds: [o.teamId, o.serviceId], sourceIds: [o.sourceId] });
-    } else gaps.push({ claim: `Owner of ${o.serviceId} is unknown: no ownership record is effective at ${iso(asOf)}`, entityIds: [o.serviceId], sourceIds: [] });
+    } else gaps.push({ claim: `Owner of ${o.serviceId} is unknown: no ownership record is effective at ${stamp(asOf)}`, entityIds: [o.serviceId], sourceIds: [] });
   }
   const sections: Section[] = [{
     id: "owners", kind: "fact", title: "Current owners",
-    summary: `Ownership as of ${iso(asOf)}.`, claims,
+    summary: `Ownership as of ${stamp(asOf)}.`, claims,
   }];
   if (gaps.length) sections.push({ id: "owner-gaps", kind: "gap", title: "Evidence gaps", summary: "No source-backed owner could be found for these services.", claims: gaps });
 
