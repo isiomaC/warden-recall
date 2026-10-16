@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "test:graph-smoke": "vitest run tests/graph-smoke.test.ts"
+    "test:graph-smoke": "vitest run tests/graph-smoke.test.ts",
+    "demo:seed": "node src/seed.ts",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "falkordb": "^6.8.0",
