@@ -18,4 +18,4 @@ All data is synthetic (a fictional company, "Northstar Commerce"). No private, p
 
 ## AI-assisted development
 
-AI coding assistants were used while building this project. The author reviewed the code and can explain the graph model, the queries, the architecture and the decisions. The tests (run with `pnpm test` against a real FalkorDB) cover the graph queries, the ingestion rules, the answer assembly, the API, the Warden policy and the MemStack behavior.
+This project was built with AI assistance: Claude (Anthropic), used through Claude Code, helped write code, tests and documentation, and was used to review the work. The author directed the design, reviewed the code and can explain the graph model, the queries, the architecture and the decisions. The tests (run with `pnpm test` against a real FalkorDB, plus `pnpm test:e2e` in a real browser) cover the graph queries, the ingestion rules, the answer assembly, the API, the Warden policy and the MemStack behavior.
