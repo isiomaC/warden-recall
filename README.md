@@ -6,6 +6,8 @@ During an incident, the hard questions cross systems, people and decisions: what
 
 It is not a chat-with-documents app. The point of the demo is that **the answer changes correctly when a new document arrives**.
 
+![Warden Recall after an ownership update: the answer, the custody strip and the graph have all changed](docs/screenshot.png)
+
 ## What it does
 
 - **Ingests Markdown into a graph.** Services, teams, people, projects, ADRs, incidents and ownership records are parsed from YAML-frontmatter Markdown, validated with Zod, and written to FalkorDB in two passes. Ingestion is idempotent and rejects dangling references, cycles and invalid ownership chronology.
