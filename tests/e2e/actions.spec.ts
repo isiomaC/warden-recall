@@ -82,3 +82,13 @@ test("memory: when ownership changed after saving, the memory is flagged and the
 test("Save investigation needs an investigation to save", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Save investigation" })).toBeDisabled();
 });
+
+test("Reset demo clears the ticket list along with the graph", async ({ page }) => {
+  await page.getByRole("button", { name: "Propose escalation" }).click();
+  await page.getByRole("button", { name: "Confirm as sre" }).click();
+  await expect(tickets(page)).toHaveCount(1);
+  await page.getByRole("button", { name: "Reset demo" }).click();
+  await page.getByRole("button", { name: "Yes, reset" }).click();
+  await expect(page.getByText("Nothing asked yet.")).toBeVisible();
+  await expect(tickets(page)).toHaveCount(0);
+});

@@ -45,7 +45,7 @@ export function ActionsPanel(p: Props) {
   const [audit, setAudit] = useState<{ entries: AuditEntry[]; valid: boolean } | null>(null);
 
   const refreshAudit = async () => { const a = await api.audit(); setAudit({ entries: a.entries, valid: a.verification.valid }); };
-  useEffect(() => { api.tickets(INCIDENT).then((t) => setTickets(t.tickets)).catch(() => {}); refreshAudit().catch(() => {}); }, []);
+  useEffect(() => { api.tickets(INCIDENT).then((t) => setTickets(t.tickets)).catch(() => {}); refreshAudit().catch(() => {}); }, [p.receipt?.docId, p.sessionId]); // refetch after reset, ingest or a new session so a wiped graph leaves no stale tickets on screen
 
   // a draft is only valid for the owner it was built for; drop it when the graph changes under it
   useEffect(() => { setDraft(null); setResult(null); }, [p.receipt?.docId]);
