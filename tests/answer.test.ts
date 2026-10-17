@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ask, investigateIncident, type CompanyBrainAnswer } from "../src/agent/answer.ts";
+import { ask, detectIntent, investigateIncident, type CompanyBrainAnswer } from "../src/agent/answer.ts";
 import { connect, ensureIndexes, GraphUnavailableError, resetGraph, type Db, type Graph } from "../src/graph/client.ts";
 import { ingestDocuments, loadDocuments } from "../src/ingestion/ingest.ts";
 
@@ -99,6 +99,29 @@ describe("free-text questions", () => {
     const a = await ask(g, { question: "What breaks if billing worker fails?", asOf: NOW });
     expect(a.intent).toBe("impact");
     expect(a.headline).toMatch(/Billing Worker fails, 4 dependent services/);
+  });
+  it.each([
+    ["Who is accountable for the billing worker?", "owner"],
+    ["Who maintains the payment queue?", "owner"],
+    ["Who should we page for checkout api?", "owner"],
+    ["Who is in charge of the payment queue?", "owner"],
+    ["What was the reason for the payment queue?", "decisions"],
+    ["What was the rationale behind the retry design?", "decisions"],
+    ["What is the blast radius if the payment queue is slow?", "impact"],
+    ["What is downstream of billing worker?", "impact"],
+    ["What relies on the payment queue?", "impact"],
+    ["Is billing worker unavailable, what is stuck?", "impact"],
+  ] as const)("routes the phrasing %j to %s", (q, intent) => { expect(detectIntent(q)).toBe(intent); });
+  it("still abstains on phrasing it does not recognise", () => {
+    for (const q of ["What's the weather in Dublin?", "Tell me a joke", "billing worker"]) expect(detectIntent(q)).toBeNull();
+  });
+  it("resolves the service when the new synonyms appear in the question", async () => {
+    const a = await ask(g, { question: "Who is accountable for the billing worker?", asOf: NOW });
+    expect(a.intent).toBe("owner");
+    expect(a.headline).toMatch(/Payments owns billing-worker/);
+    const b = await ask(g, { question: "What is the blast radius if billing worker is down?", asOf: NOW });
+    expect(b.intent).toBe("impact");
+    expect(b.headline).toContain("Billing Worker");
   });
   it("abstains on unsupported topics and unknown services rather than guessing", async () => {
     const weather = await ask(g, { question: "What's the weather in Dublin?", asOf: NOW });

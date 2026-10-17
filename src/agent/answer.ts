@@ -262,13 +262,14 @@ export async function explainDecisions(g: Graph, serviceId: string, asOf: number
 // ---- free-text routing -------------------------------------------------------------------------
 
 const STOP = new Set("a an the is are was were be been do does did what whats which who whom why how when where of for to in on at by with and or about can you please tell me us it its this that now currently right".split(" "));
-const INTENT_WORDS = new Set("own owns owned owner owners ownership responsible oncall on-call why decision decisions adr introduced introduce designed architecture affected affect affects impact impacted down fail fails failing failed outage broke broken depend depends dependents investigate incident change changed".split(" "));
+const INTENT_WORDS = new Set("own owns owned owner owners ownership responsible oncall on-call why decision decisions adr introduced introduce designed architecture affected affect affects impact impacted down fail fails failing failed outage broke broken depend depends dependents investigate incident change changed reason reasons rationale chose chosen decided decide tradeoff trade-off background origin design accountable maintainer maintainers maintains maintained manages steward escalate escalation pager belongs charge call page contact breaks break blast radius downstream dependent dependencies dependency relies rely degraded slow unavailable stuck errors error crash crashed crashes".split(" "));
 
+/** Deterministic keyword routing, checked in this order: decisions, then owner, then impact. No LLM; unknown phrasing abstains. */
 export function detectIntent(text: string): Intent | null {
   const t = text.toLowerCase();
-  if (/\b(why|decision|decisions|adr|introduced|designed|architecture|rationale)\b/.test(t)) return "decisions";
-  if (/\b(own|owns|owned|owner|owners|ownership|responsible|on-?call)\b/.test(t)) return "owner";
-  if (/\b(affect|affected|affects|impact|impacted|down|fail|fails|failing|failed|outage|broke|broken|depend|depends)\b/.test(t)) return "impact";
+  if (/\b(why|decision|decisions|decided|decide|adr|introduced|designed|design|architecture|rationale|reason|reasons|chose|chosen|tradeoff|trade-off|background|origin)\b/.test(t)) return "decisions";
+  if (/\b(own|owns|owned|owner|owners|ownership|responsible|accountable|maintainers?|maintains|maintained|manages|steward|escalate|escalation|pager|belongs|on-?call)\b|in charge|who (should|do|to) (we )?(call|page|ask|contact)/.test(t)) return "owner";
+  if (/\b(affect|affected|affects|impact|impacted|down|fail|fails|failing|failed|outage|broke|broken|break|breaks|blast|downstream|dependents?|dependenc(y|ies)|depend|depends|relies|rely|degraded|slow|unavailable|stuck|errors?|crash(ed|es)?)\b/.test(t)) return "impact";
   return null;
 }
 

@@ -59,6 +59,12 @@ RETURN pr.id AS projectId, pr.name AS projectName, s.id AS serviceId, length(p) 
 ORDER BY hops, projectId
 ```
 
+## Question routing (no LLM)
+
+Free-text questions are routed by `detectIntent` in `src/agent/answer.ts`, which is deterministic. It checks keyword groups in a fixed order: **decisions** (why, rationale, reason, decided, design, ADR), then **owner** (who owns, accountable, maintains, on-call, escalate, in charge, who to page), then **impact** (affected, breaks, blast radius, downstream, depends, relies, down, slow). The first group that matches picks the query. Words that only signal intent are removed before the service name is resolved with the full-text index below.
+
+If no group matches, or no service matches, the app abstains and suggests the supported questions instead of guessing. An ambiguous service name returns a choice. The model is never asked to pick a query or write one, so an answer can only contain facts the graph returned. The preset questions in the UI skip routing and run their query directly.
+
 ## Service resolution (full-text)
 
 ```cypher

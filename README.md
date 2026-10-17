@@ -74,6 +74,6 @@ tests/                integration tests
 
 ## Limitations
 
-- Question understanding is deterministic: presets plus keyword routing and full-text service resolution. There is no LLM in the loop, by design, so answers cannot invent graph facts.
+- Question understanding is deterministic: presets plus keyword routing and full-text service resolution (see `docs/QUERIES.md`, "Question routing"). There is no LLM in the loop, by design, so answers cannot invent graph facts. Phrasing outside the known keywords gets an abstain with suggested questions.
 - The company is synthetic and small (5 services, 3 teams, 2 people). Queries are bounded (depth 4) and written for clarity, not benchmarked at scale.
 - The demo clock defaults to the current time. Ownership changes are effective from the document's `validFrom`.
