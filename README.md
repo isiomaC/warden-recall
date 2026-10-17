@@ -45,6 +45,37 @@ No API keys or external accounts are needed. All data is synthetic.
 
 Set `DEMO_AS_OF=2026-10-18T10:00:00Z` for a deterministic clock.
 
+## Graph data model
+
+Every node and edge comes from ingesting a Markdown document. Full detail is in [docs/GRAPH_MODEL.md](docs/GRAPH_MODEL.md).
+
+```
+(Team)-[:OWNS {validFrom, validTo, sourceId}]->(Service)   temporal ownership, absent validTo = open-ended
+(Service)-[:DEPENDS_ON]->(Service)                         A is impacted when B fails
+(Incident)-[:AFFECTS]->(Service)    (Project)-[:USES]->(Service)
+(Service)-[:HAS_DECISION]->(ADR)    (ADR)-[:AMENDS]->(ADR)
+(Person)-[:MEMBER_OF]->(Team)       (Person)-[:ON_CALL_FOR]->(Service)
+(Ticket)-[:ESCALATES]->(Incident)   (Ticket)-[:ASSIGNED_TO]->(Team)
+(any entity)-[:DOCUMENTED_IN]->(Document)                  provenance for every claim
+```
+
+Nodes: `Service`, `Team`, `Person`, `Project`, `ADR`, `Incident`, `Ticket`, `Document`. Indexes: id on every label, full-text on `Service.name`.
+
+## Key Cypher queries
+
+The product depends on these (all parameterized; the full list with explanations is in [docs/QUERIES.md](docs/QUERIES.md)):
+
+```cypher
+// Multi-hop impact: everything that breaks when a service fails
+MATCH p=(dep:Service)-[:DEPENDS_ON*1..4]->(failed:Service {id:$serviceId})
+RETURN dep.id AS id, length(p) AS hops, nodes(p) AS nodes, relationships(p) AS edges ORDER BY hops, id
+
+// Ownership as of a point in time (single-service form of the query in src/graph/queries.ts)
+MATCH (t:Team)-[o:OWNS]->(s:Service {id:$serviceId})
+WHERE o.validFrom <= $asOf AND (o.validTo IS NULL OR $asOf < o.validTo)
+RETURN t.id AS teamId, t.name AS team, o.validFrom AS since, o.sourceId AS sourceId
+```
+
 ## Tests
 
 ```sh
