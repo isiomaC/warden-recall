@@ -6,6 +6,8 @@ During an incident, the hard questions cross systems, people and decisions: what
 
 It is not a chat-with-documents app. The point of the demo is that **the answer changes correctly when a new document arrives**.
 
+**Demo video (2:41): https://vimeo.com/1236803469**
+
 ![Warden Recall after an ownership update: the answer, the custody strip and the graph have all changed](docs/screenshot.png)
 
 ## What it does
